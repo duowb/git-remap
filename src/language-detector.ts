@@ -224,12 +224,12 @@ export function detectFileLanguage(filePath: string): string {
   // 文件扩展名到语言的映射
   const extToLang: Record<string, string> = {
     // JavaScript 相关
-    '.js': 'javascript',
-    '.jsx': 'javascript',
+    '.js': 'js',
+    '.jsx': 'js',
     '.ts': 'typescript',
     '.tsx': 'typescript',
-    '.mjs': 'javascript',
-    '.cjs': 'javascript',
+    '.mjs': 'js',
+    '.cjs': 'js',
 
     // Web 相关
     '.html': 'html',
@@ -273,7 +273,7 @@ export function detectFileLanguage(filePath: string): string {
     '.bat': 'batch',
     '.cmd': 'batch',
     '.r': 'r',
-    '.dart': 'dart',
+    '.dart': 'dartlang',
     '.lua': 'lua',
     '.clj': 'clojure',
     '.ex': 'elixir',
