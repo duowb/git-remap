@@ -51,19 +51,21 @@ export function createHostServer() {
           message: '缺少path'
         });
       }
-      const projects = await findGitProjects(path);
-      if (projects.length === 0) {
+      try {
+        const projects = await findGitProjects(path);
         return requestFormat(res, {
           code: 200,
-          data: [],
+          data: projects,
           message: '请求成功'
         });
+      } catch (error) {
+        console.error(error);
+        return requestFormat(res, {
+          code: 500,
+          data: null,
+          message: '请检查路径是否正确'
+        });
       }
-      return requestFormat(res, {
-        code: 200,
-        data: projects,
-        message: '请求成功'
-      });
     })
   );
 
