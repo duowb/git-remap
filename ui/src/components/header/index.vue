@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import Toolbar from 'primevue/toolbar';
+import { version } from '../../../package.json';
 import { isDark, toggleDark } from '../../composables/dark';
 </script>
 
 <template>
   <Toolbar class="b-x-none! b-t-none! b-rd-0!">
     <template #start>
-      <span font-bold>Git</span><span font-100>Remap</span><sup op50>v</sup>
+      <span font-bold>Git</span><span font-100>Remap</span><sup op50>v{{ version }}</sup>
     </template>
     <template #end>
       <span
