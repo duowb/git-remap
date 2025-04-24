@@ -27,7 +27,9 @@ const oldUrl = computed(() => {
   if (props.data.length === 0) {
     return '';
   }
-  return new URL(props.data[0].remoteUrl).origin;
+  const remoteUrl = props.data[0].remoteUrl;
+  if (!remoteUrl) return '暂无git源地址';
+  return new URL(remoteUrl).origin;
 });
 
 const newUrl = ref('');

@@ -2,9 +2,14 @@
 import { useFetch } from '@vueuse/core';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
+import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable, { type DataTableRowSelectAllEvent } from 'primevue/datatable';
+import { useConfirm } from 'primevue/useconfirm';
 import { ref, shallowRef, watch } from 'vue';
+
 import type { Project } from '../../../../src/types';
+
+const confirm = useConfirm();
 
 const selectItem = ref<Project[]>([]);
 const props = defineProps<{
@@ -49,55 +54,87 @@ function handleRowUnselectAll() {
   selectItem.value = [];
 }
 function handleUpdate(data: Project[]) {
+  if (data.length === 1) {
+    emit('update', data);
+    return;
+  }
+  let remoteUrlHostname = '';
+  for (const item of data) {
+    if (!item.remoteUrl) break;
+    const currentItemHostname = new URL(item.remoteUrl).hostname;
+    if (remoteUrlHostname && currentItemHostname !== remoteUrlHostname) {
+      confirm.require({
+        message: '所选的项目源地址不一致，是否继续？',
+        header: '提示',
+        rejectProps: {
+          label: '取消',
+          severity: 'secondary',
+          outlined: true
+        },
+        acceptProps: {
+          label: '继续',
+          severity: 'danger'
+        },
+        accept: () => {
+          emit('update', data);
+        }
+      });
+      return;
+    }
+    remoteUrlHostname = currentItemHostname;
+  }
   emit('update', data);
 }
 </script>
 
 <template>
-  <DataTable
-    v-model:selection="selectItem"
-    :value="listData"
-    data-key="projectPath"
-    size="small"
-    scrollable
-    scroll-height="flex"
-    @row-select-all="handleRowSelectAll"
-    @row-unselect-all="handleRowUnselectAll"
-  >
-    <template #empty>
-      <div class="text-center w-full">暂无数据</div>
-    </template>
-    <Column selection-mode="multiple" />
-    <Column field="projectName" header="项目" />
-    <Column field="projectType" header="类型">
-      <template #body="{ data }">
-        <span
-          text-xl
-          block
-          :class="`i-vscode-icons-file-type-${data.projectType}`"
-          :title="data.projectType"
-        />
+  <div>
+    <DataTable
+      v-model:selection="selectItem"
+      :value="listData"
+      data-key="projectPath"
+      size="small"
+      scrollable
+      scroll-height="flex"
+      @row-select-all="handleRowSelectAll"
+      @row-unselect-all="handleRowUnselectAll"
+    >
+      <template #empty>
+        <div class="text-center w-full">暂无数据</div>
       </template>
-    </Column>
-    <Column field="currentBranch" header="分支" />
-    <Column field="remoteUrl" header="源地址" />
-    <Column class="text-center" header-style="width: 10rem;height: 3rem">
-      <template #header>
-        <Button
-          v-if="selectItem.length > 0"
-          label="批量修改"
-          severity="help"
-          variant="text"
-          size="small"
-          :badge="selectItem.length.toString()"
-          @click="handleUpdate(selectItem)"
-        />
-      </template>
-      <template #body="{ data }">
-        <Button severity="help" variant="text" size="small" @click="handleUpdate([data])">
-          修改
-        </Button>
-      </template>
-    </Column>
-  </DataTable>
+      <Column selection-mode="multiple" />
+      <Column field="projectName" header="项目" />
+      <Column field="projectType" header="类型">
+        <template #body="{ data }">
+          <span
+            text-xl
+            block
+            :class="`i-vscode-icons-file-type-${data.projectType}`"
+            :title="data.projectType"
+          />
+        </template>
+      </Column>
+      <Column field="currentBranch" header="分支" />
+      <Column field="remoteUrl" header="源地址" />
+      <Column class="text-center" header-style="width: 10rem;height: 3rem">
+        <template #header>
+          <Button
+            v-if="selectItem.length > 0"
+            label="批量修改"
+            severity="help"
+            variant="text"
+            size="small"
+            :badge="selectItem.length.toString()"
+            @click="handleUpdate(selectItem)"
+          />
+        </template>
+        <template #body="{ data }">
+          <Button severity="help" variant="text" size="small" @click="handleUpdate([data])">
+            修改
+          </Button>
+        </template>
+      </Column>
+    </DataTable>
+    <ConfirmDialog />
+  </div>
 </template>
