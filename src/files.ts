@@ -37,7 +37,6 @@ export async function findGitProjects(dirPath: string): Promise<Project[]> {
 
   try {
     const entries = readdirSync(dirPath, { withFileTypes: true });
-    console.log('entries', entries);
     // 检查当前目录是否是 Git 项目
     const isGitProject = entries.some((entry) => entry.isDirectory() && entry.name === '.git');
     if (isGitProject) {
