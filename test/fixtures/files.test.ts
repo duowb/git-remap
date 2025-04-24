@@ -1,11 +1,11 @@
-import { describe, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { cwd } from 'process'
 
 import { findGitProjects } from '../../src/files'
 
 describe('findGitProjects', () => {
   it('should find all git projects', async () => {
-    const path = "D:\\code\\hatech"
-    const projects = await findGitProjects(path)
-    console.log(projects)
+    const projects = await findGitProjects(cwd())
+    expect(projects[0].remoteUrl).toMatchInlineSnapshot(`"https://github.com/duowb/git-remap.git"`)
   })
 })
