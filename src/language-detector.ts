@@ -1,5 +1,4 @@
-import { existsSync } from 'node:fs';
-import { readdir } from 'node:fs/promises';
+import { existsSync, readdirSync } from 'node:fs';
 import { basename, extname, join, sep } from 'node:path';
 
 /**
@@ -26,10 +25,10 @@ export function getProjectName(dirPath: string): string {
  * @param dirPath 项目目录路径
  * @returns 项目使用的编程语言，如果无法确定则返回 'unknown'
  */
-export async function detectProjectLanguage(dirPath: string): Promise<string> {
+export function detectProjectLanguage(dirPath: string): string {
   try {
     // 获取目录中的文件列表
-    const files = await readdir(dirPath);
+    const files = readdirSync(dirPath);
     const fileSet = new Set(files);
 
     // 定义各种语言的特征文件
@@ -153,7 +152,7 @@ export async function detectProjectLanguage(dirPath: string): Promise<string> {
     for (const file of files) {
       if (existsSync(join(dirPath, file)) && !file.startsWith('.')) {
         try {
-          const stat = await readdir(join(dirPath, file), { withFileTypes: true });
+          const stat = readdirSync(join(dirPath, file), { withFileTypes: true });
 
           // 如果是目录且不是隐藏目录，则跳过
           if (stat.some((entry) => entry.isDirectory())) {

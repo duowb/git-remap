@@ -1,5 +1,4 @@
-import { existsSync } from 'node:fs';
-import { readdir, readFile } from 'node:fs/promises';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getCurrentBranch, getGitRemoteUrl } from './git';
 import { detectProjectLanguage, getProjectName } from './language-detector';
@@ -10,9 +9,9 @@ import type { Project } from './types';
  * @param modulesPath .gitmodules 文件路径
  * @returns 子模块路径列表
  */
-async function parseGitModules(modulesPath: string): Promise<string[]> {
+function parseGitModules(modulesPath: string): string[] {
   try {
-    const content = await readFile(modulesPath, 'utf-8');
+    const content = readFileSync(modulesPath, 'utf-8');
     const paths: string[] = [];
     const regex = /path\s*=\s*(.+)/g;
     let match;
@@ -37,12 +36,12 @@ export async function findGitProjects(dirPath: string): Promise<Project[]> {
   const gitProjects: Project[] = [];
 
   try {
-    const entries = await readdir(dirPath, { withFileTypes: true });
+    const entries = readdirSync(dirPath, { withFileTypes: true });
 
     // 检查当前目录是否是 Git 项目
     const isGitProject = entries.some((entry) => entry.isDirectory() && entry.name === '.git');
     if (isGitProject) {
-      const projectType = await detectProjectLanguage(dirPath);
+      const projectType = detectProjectLanguage(dirPath);
       const currentBranch = await getCurrentBranch(dirPath);
       const remoteUrl = await getGitRemoteUrl(dirPath);
       gitProjects.push({

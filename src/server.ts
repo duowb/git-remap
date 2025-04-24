@@ -1,4 +1,4 @@
-import { readFile, stat } from 'node:fs/promises';
+import { readFileSync, statSync } from 'node:fs';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { join } from 'node:path';
 
@@ -33,13 +33,9 @@ export function createHostServer() {
   const router = createRouter();
   app.use(router);
 
-  const fileMap = new Map<string, Promise<string | undefined>>();
+  const fileMap = new Map<string, string>();
   const readCachedFile = (id: string) => {
-    if (!fileMap.has(id))
-      fileMap.set(
-        id,
-        readFile(id, 'utf-8').catch(() => undefined)
-      );
+    if (!fileMap.has(id)) fileMap.set(id, readFileSync(id, 'utf-8'));
     return fileMap.get(id);
   };
 
@@ -109,9 +105,9 @@ export function createHostServer() {
   router
     .get(
       '/api/history',
-      eventHandler(async (event) => {
+      eventHandler((event) => {
         const { res } = event.node;
-        const historyFiles = await listHistoryFiles();
+        const historyFiles = listHistoryFiles();
         return requestFormat(res, {
           code: 200,
           data: historyFiles,
@@ -121,7 +117,7 @@ export function createHostServer() {
     )
     .get(
       '/api/history/:fileName',
-      eventHandler(async (event) => {
+      eventHandler((event) => {
         const { res } = event.node;
         const { fileName } = event.context.params!;
         if (!fileName) {
@@ -131,7 +127,7 @@ export function createHostServer() {
             message: '参数错误'
           });
         }
-        const history = await readHistoryFile(fileName);
+        const history = readHistoryFile(fileName);
         return requestFormat(res, {
           code: 200,
           data: history,
@@ -156,7 +152,7 @@ export function createHostServer() {
             message: '参数错误'
           });
         }
-        await recordGitOperation({
+        recordGitOperation({
           repoPath: body.path,
           oldRemoteUrl: body.oldRemote,
           newRemoteUrl: body.newRemote,
@@ -176,8 +172,8 @@ export function createHostServer() {
       const result = await serveStatic(event, {
         fallthrough: true,
         getContents: (id) => readCachedFile(join(uiDistDir, id)),
-        getMeta: async (id) => {
-          const stats = await stat(join(uiDistDir, id)).catch(() => {});
+        getMeta: (id) => {
+          const stats = statSync(join(uiDistDir, id));
           if (!stats || !stats.isFile()) return;
           return {
             type: lookup(id),
