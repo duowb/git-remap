@@ -4,6 +4,7 @@ import Button from 'primevue/button';
 import Column from 'primevue/column';
 import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable, { type DataTableRowSelectAllEvent } from 'primevue/datatable';
+import Skeleton from 'primevue/skeleton';
 import { useConfirm } from 'primevue/useconfirm';
 import { ref, shallowRef, watch } from 'vue';
 
@@ -25,6 +26,15 @@ const listData = shallowRef<Project[]>([]);
 
 function getData() {
   loading.value = true;
+  listData.value = [
+    {
+      projectName: '_skeleton',
+      projectType: '_skeleton',
+      currentBranch: '_skeleton',
+      remoteUrl: '_skeleton',
+      projectPath: '_skeleton'
+    }
+  ];
   useFetch<{
     data: Project[];
     code: number;
@@ -102,11 +112,18 @@ function handleUpdate(data: Project[]) {
       <template #empty>
         <div class="text-center w-full">暂无数据</div>
       </template>
-      <Column selection-mode="multiple" />
-      <Column field="projectName" header="项目" />
+      <Column v-if="!loading" selection-mode="multiple" />
+      <Column field="projectName" header="项目">
+        <template #body="{ data }">
+          <Skeleton v-if="data.projectName === '_skeleton'" />
+          <span v-else>{{ data.projectName }}</span>
+        </template>
+      </Column>
       <Column field="projectType" header="类型">
         <template #body="{ data }">
+          <Skeleton v-if="data.projectType === '_skeleton'" />
           <span
+            v-else
             text-xl
             block
             :class="`i-vscode-icons-file-type-${data.projectType}`"
@@ -114,8 +131,18 @@ function handleUpdate(data: Project[]) {
           />
         </template>
       </Column>
-      <Column field="currentBranch" header="分支" />
-      <Column field="remoteUrl" header="源地址" />
+      <Column field="currentBranch" header="分支">
+        <template #body="{ data }">
+          <Skeleton v-if="data.currentBranch === '_skeleton'" />
+          <span v-else>{{ data.currentBranch }}</span>
+        </template>
+      </Column>
+      <Column field="remoteUrl" header="源地址">
+        <template #body="{ data }">
+          <Skeleton v-if="data.remoteUrl === '_skeleton'" />
+          <span v-else>{{ data.remoteUrl }}</span>
+        </template>
+      </Column>
       <Column class="text-center" header-style="width: 10rem;height: 3rem">
         <template #header>
           <Button
@@ -129,7 +156,8 @@ function handleUpdate(data: Project[]) {
           />
         </template>
         <template #body="{ data }">
-          <Button severity="help" variant="text" size="small" @click="handleUpdate([data])">
+          <Skeleton v-if="data.remoteUrl === '_skeleton'" />
+          <Button v-else severity="help" variant="text" size="small" @click="handleUpdate([data])">
             修改
           </Button>
         </template>
@@ -138,3 +166,9 @@ function handleUpdate(data: Project[]) {
     <ConfirmDialog />
   </div>
 </template>
+
+<style>
+.p-datatable-scrollable-table > .p-datatable-thead {
+  z-index: 3;
+}
+</style>
