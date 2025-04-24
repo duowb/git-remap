@@ -37,7 +37,7 @@ export async function findGitProjects(dirPath: string): Promise<Project[]> {
 
   try {
     const entries = readdirSync(dirPath, { withFileTypes: true });
-
+    console.log('entries', entries);
     // 检查当前目录是否是 Git 项目
     const isGitProject = entries.some((entry) => entry.isDirectory() && entry.name === '.git');
     if (isGitProject) {
@@ -76,8 +76,8 @@ export async function findGitProjects(dirPath: string): Promise<Project[]> {
         gitProjects.push(...subProjects);
       }
     }
-  } catch (error) {
-    console.error(`Error scanning directory ${dirPath}:`, error);
+  } catch {
+    throw new Error(`文件路径错误`);
   }
 
   return gitProjects;

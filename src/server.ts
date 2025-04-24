@@ -58,12 +58,11 @@ export function createHostServer() {
           data: projects,
           message: '请求成功'
         });
-      } catch (error) {
-        console.error(error);
+      } catch (error: any) {
         return requestFormat(res, {
           code: 500,
           data: null,
-          message: '请检查路径是否正确'
+          message: error.message
         });
       }
     })

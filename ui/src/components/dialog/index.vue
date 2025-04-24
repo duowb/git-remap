@@ -3,12 +3,13 @@ import { useFetch } from '@vueuse/core';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
-import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
-import { computed, ref } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
+import Toast from '../toast/index.vue';
 import type { Project } from '../../../../src/types';
 
-const toast = useToast();
+type ToastType = InstanceType<typeof Toast>;
+
+const toastRef = useTemplateRef<ToastType>('toastRef');
 
 const props = defineProps<{
   data: Project[];
@@ -56,22 +57,13 @@ async function replace() {
     .json();
   replaceLoading.value = false;
   if (data.value.code !== 200) {
-    toast.add({
-      severity: 'error',
-      detail: data.value.message
-    });
-
+    toastRef.value?.showErrorToast('替换失败', data.value.message);
     return;
   }
   close();
   const successCount = data.value.data.filter((item: any) => item.isReplaceSuccess).length;
 
-  toast.add({
-    severity: 'success',
-    summary: '替换成功',
-    detail: `共 ${successCount} 个地址替换成功`,
-    life: 3000
-  });
+  toastRef.value?.showSuccessToast('替换成功', `共 ${successCount} 个地址替换成功`);
 }
 
 defineExpose({
@@ -81,7 +73,7 @@ defineExpose({
 </script>
 
 <template>
-  <Toast />
+  <Toast ref="toastRef" />
   <Dialog v-model:visible="visible" modal header="修改地址" :style="{ width: '40rem' }">
     <div class="flex items-center gap-4 mb-4">
       <label for="oldUrl" class="font-semibold w-24">旧地址</label>

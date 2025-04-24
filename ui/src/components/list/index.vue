@@ -6,15 +6,20 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable, { type DataTableRowSelectAllEvent } from 'primevue/datatable';
 import Skeleton from 'primevue/skeleton';
 import { useConfirm } from 'primevue/useconfirm';
-import { ref, shallowRef } from 'vue';
+import { ref, shallowRef, useTemplateRef } from 'vue';
+import Toast from '../toast/index.vue';
 
 import type { Project } from '../../../../src/types';
+
+type ToastType = InstanceType<typeof Toast>;
 
 const confirm = useConfirm();
 
 const selectItem = ref<Project[]>([]);
 
 const loading = defineModel('loading', { required: true });
+
+const toastRef = useTemplateRef<ToastType>('toastRef');
 
 const emit = defineEmits<{
   (e: 'update', value: Project[]): void;
@@ -41,7 +46,11 @@ function getData(searchPath: string) {
     .json()
     .then(({ data }) => {
       loading.value = false;
-      if (data.value.code !== 200) return;
+      if (data.value.code !== 200) {
+        listData.value = [];
+        toastRef.value?.showErrorToast('获取失败', data.value.message);
+        return;
+      }
       listData.value = data.value.data;
     });
 }
@@ -93,6 +102,7 @@ defineExpose({
 
 <template>
   <div>
+    <Toast ref="toastRef" />
     <DataTable
       v-model:selection="selectItem"
       :value="listData"
