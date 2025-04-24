@@ -1,0 +1,7 @@
+packages:
+  - playground
+  - docs
+  - ui
+  - test/fixtures/*
+  - packages/*
+  - examples/*

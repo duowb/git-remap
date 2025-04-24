@@ -1,0 +1,31 @@
+{
+  "name": "ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@iconify-json/carbon": "^1.2.8",
+    "@iconify-json/vscode-icons": "^1.2.19",
+    "@primeuix/themes": "^1.0.3",
+    "@unocss/reset": "66.1.0-beta.12",
+    "@vueuse/core": "^13.1.0",
+    "primevue": "^4.3.3",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.2",
+    "@vue/tsconfig": "^0.7.0",
+    "typescript": "~5.7.2",
+    "unocss": "66.1.0-beta.12",
+    "vite": "^6.3.1",
+    "vue-tsc": "^2.2.8"
+  },
+  "volta": {
+    "extends": "../package.json"
+  }
+}
