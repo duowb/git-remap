@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Toolbar from 'primevue/toolbar';
-import { version } from '../../../package.json';
+import { version } from '../../../../package.json';
 import { isDark, toggleDark } from '../../composables/dark';
 </script>
 
