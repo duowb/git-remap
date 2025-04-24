@@ -24,17 +24,15 @@ function handleUpdate(value: Project[]) {
 </script>
 
 <template>
-  <div w-100vw h-100vh>
+  <div w-100vw h-100vh flex="~ col" of-hidden>
     <Header />
-    <div px-4>
-      <Search class="mt-4" :loading="searchLoading" @search="handleSearch" />
-      <List
-        v-model:loading="searchLoading"
-        class="mt-4"
-        :search-path="searchPath"
-        @update="handleUpdate"
-      />
-    </div>
+    <Search class="px-3 mt-4" :loading="searchLoading" @search="handleSearch" />
+    <List
+      v-model:loading="searchLoading"
+      class="px-3 mt-4 h-[calc(100%-91px)]"
+      :search-path="searchPath"
+      @update="handleUpdate"
+    />
     <Dialog ref="dialogRef" :data="selectItem" />
   </div>
 </template>
