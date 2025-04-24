@@ -17,34 +17,17 @@
     "bin.mjs",
     "dist"
   ],
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
-    },
-    "./register": {
-      "types": "./dist/register.d.ts",
-      "require": "./dist/register.cjs",
-      "import": "./dist/register.mjs"
-    }
-  },
   "typesVersions": {
     "*": {
       "*": [
-        "./dist/*",
-        "./dist/index.d.ts"
+        "./dist/*"
       ]
     }
   },
   "sideEffects": false,
   "bin": "./bin.mjs",
   "scripts": {
-    "build": "nr js:build && nr ui:build && build",
-    "start": "nr js:build && nr -C ui build:doctor && build && nr dev",
+    "build": "nr js:build && nr ui:build",
     "dev": "nr -C ui dev",
     "js:build": "unbuild",
     "ui:build": "nr -C ui build",
