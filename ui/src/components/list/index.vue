@@ -6,16 +6,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable, { type DataTableRowSelectAllEvent } from 'primevue/datatable';
 import Skeleton from 'primevue/skeleton';
 import { useConfirm } from 'primevue/useconfirm';
-import { ref, shallowRef, watch } from 'vue';
+import { ref, shallowRef } from 'vue';
 
 import type { Project } from '../../../../src/types';
 
 const confirm = useConfirm();
 
 const selectItem = ref<Project[]>([]);
-const props = defineProps<{
-  searchPath: string;
-}>();
+
 const loading = defineModel('loading', { required: true });
 
 const emit = defineEmits<{
@@ -24,7 +22,7 @@ const emit = defineEmits<{
 
 const listData = shallowRef<Project[]>([]);
 
-function getData() {
+function getData(searchPath: string) {
   loading.value = true;
   listData.value = [
     {
@@ -39,7 +37,7 @@ function getData() {
     data: Project[];
     code: number;
     message: string;
-  }>(`/api/files?path=${props.searchPath}`)
+  }>(`/api/files?path=${searchPath}`)
     .json()
     .then(({ data }) => {
       loading.value = false;
@@ -47,14 +45,6 @@ function getData() {
       listData.value = data.value.data;
     });
 }
-
-watch(
-  () => props.searchPath,
-  (n) => {
-    if (!n) return;
-    getData();
-  }
-);
 
 function handleRowSelectAll({ data }: DataTableRowSelectAllEvent) {
   selectItem.value = data;
@@ -95,6 +85,10 @@ function handleUpdate(data: Project[]) {
   }
   emit('update', data);
 }
+
+defineExpose({
+  getData
+});
 </script>
 
 <template>
