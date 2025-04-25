@@ -43,7 +43,7 @@ function handleSearch() {
       label="搜索"
       :loading="loading"
       icon="i-carbon:search text-5"
-      :disabled="!search"
+      :disabled="!search || loading"
       min-w-20
       @click="handleSearch"
     />
