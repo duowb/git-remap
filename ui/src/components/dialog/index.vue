@@ -21,6 +21,7 @@ const emits = defineEmits<{
 
 const visible = ref(false);
 function close() {
+  newUrl.value = '';
   visible.value = false;
 }
 
@@ -34,6 +35,9 @@ const oldUrl = computed(() => {
   }
   const remoteUrl = props.data[0].remoteUrl;
   if (!remoteUrl) return '暂无git源地址';
+  if (props.data.length === 1) {
+    return remoteUrl;
+  }
   return new URL(remoteUrl).origin;
 });
 
