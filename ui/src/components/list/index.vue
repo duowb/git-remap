@@ -38,6 +38,7 @@ function getData(searchPath: string) {
       projectPath: '_skeleton'
     }
   ];
+  handleRowUnselectAll();
   useFetch<{
     data: Project[];
     code: number;
