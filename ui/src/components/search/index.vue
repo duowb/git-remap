@@ -16,7 +16,6 @@ defineProps<{
 const search = ref('');
 function clearSearch() {
   search.value = '';
-  emits('search', search.value);
 }
 
 function handleSearch() {
@@ -44,6 +43,7 @@ function handleSearch() {
       label="搜索"
       :loading="loading"
       icon="i-carbon:search text-5"
+      :disabled="!search"
       min-w-20
       @click="handleSearch"
     />
