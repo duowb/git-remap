@@ -84,6 +84,14 @@ defineExpose({
 <template>
   <Toast ref="toastRef" />
   <Dialog v-model:visible="visible" modal header="修改地址" :style="{ width: '40rem' }">
+    <div class="mb-4">
+      <span v-if="data.length === 1" class="text-sm text-gray-500"
+        >当前是单个项目,请替换完整地址</span
+      >
+      <span v-if="data.length > 1" class="text-sm text-gray-500"
+        >当前是多个项目,请替换部分地址</span
+      >
+    </div>
     <div class="flex items-center gap-4 mb-4">
       <label for="oldUrl" class="font-semibold w-24">旧地址</label>
       <span id="oldUrl" class="flex-auto" autocomplete="off">{{ oldUrl }}</span>
