@@ -13,7 +13,9 @@ type ListType = InstanceType<typeof List>;
 const listRef = useTemplateRef<ListType>('listRef');
 
 const searchLoading = ref(false);
+const searchValue = ref('');
 function handleSearch(value: string) {
+  searchValue.value = value;
   listRef.value?.getData(value);
 }
 
@@ -22,6 +24,9 @@ const selectItem = ref<Project[]>([]);
 function handleUpdate(value: Project[]) {
   selectItem.value = value;
   dialogRef.value?.open();
+}
+function handleSuccess() {
+  handleSearch(searchValue.value);
 }
 </script>
 
@@ -35,6 +40,6 @@ function handleUpdate(value: Project[]) {
       class="px-3 mt-4 h-[calc(100%-91px)]"
       @update="handleUpdate"
     />
-    <Dialog ref="dialogRef" :data="selectItem" />
+    <Dialog ref="dialogRef" :data="selectItem" @success="handleSuccess" />
   </div>
 </template>

@@ -15,6 +15,10 @@ const props = defineProps<{
   data: Project[];
 }>();
 
+const emits = defineEmits<{
+  (e: 'success'): void;
+}>();
+
 const visible = ref(false);
 function close() {
   visible.value = false;
@@ -64,6 +68,7 @@ async function replace() {
   const successCount = data.value.data.filter((item: any) => item.isReplaceSuccess).length;
 
   toastRef.value?.showSuccessToast('替换成功', `共 ${successCount} 个地址替换成功`);
+  emits('success');
 }
 
 defineExpose({
