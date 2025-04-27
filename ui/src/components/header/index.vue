@@ -6,13 +6,27 @@ import Version from '../version/index.vue';
 
 <template>
   <Toolbar class="b-x-none! b-t-none! b-rd-0!">
-    <template #start> <span font-bold>Git</span><span font-100>Remap</span><Version /> </template>
+    <template #start>
+      <span font-bold>Git</span><span font-100>Remap</span>
+      <Version />
+      <a
+        op75
+        hover:op100
+        text-2xl
+        cursor-pointer
+        i-carbon-logo-github
+        href="https://github.com/duowb/git-remap"
+        target="_blank"
+      />
+    </template>
     <template #end>
       <span
         op75
         hover:op100
+        text-2xl
+        cursor-pointer
         title="切换颜色"
-        :class="['text-2xl cursor-pointer', { 'i-carbon-moon': isDark, 'i-carbon:sun': !isDark }]"
+        :class="[{ 'i-carbon-moon': isDark, 'i-carbon:sun': !isDark }]"
         @click="toggleDark"
       />
     </template>
