@@ -15,7 +15,7 @@
 
 
 ### 使用方法 2
-> 纯前端方案
+> 纯前端方案  [👉点我查看](https://github.com/duowb/git-remap/tree/next)
 
 [`https://git-remap-ui.vercel.app/`](https://git-remap-ui.vercel.app/)
 
