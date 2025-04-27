@@ -8,6 +8,90 @@ export type Project = {
 };
 
 /**
+ * 项目类型配置，包含特征文件和需要忽略的目录
+ * 语言按优先级排序
+ */
+interface ProjectTypeConfig {
+  name: string; // 语言/框架名称
+  indicators: string[]; // 特征文件/目录
+  ignoreDirs: string[]; // 该语言特有的需要忽略的目录
+}
+
+/**
+ * 项目类型配置数组，按优先级排序
+ */
+const PROJECT_CONFIGS: ProjectTypeConfig[] = [
+  {
+    name: 'node',
+    indicators: ['package.json', 'node_modules', 'npm-debug.log', 'yarn.lock', 'package-lock.json'],
+    ignoreDirs: ['node_modules', 'bower_components', 'jspm_packages']
+  },
+  {
+    name: 'java',
+    indicators: ['pom.xml', 'build.gradle', '.classpath', '.project', 'src/main/java'],
+    ignoreDirs: ['target', 'build', '.gradle', '.mvn']
+  },
+  {
+    name: 'python',
+    indicators: ['requirements.txt', 'setup.py', 'pyproject.toml', 'Pipfile'],
+    ignoreDirs: ['venv', '.venv', 'env', 'virtualenv', '__pycache__']
+  },
+  {
+    name: 'go',
+    indicators: ['go.mod', 'go.sum', 'main.go'],
+    ignoreDirs: ['vendor']
+  },
+  {
+    name: 'php',
+    indicators: ['composer.json', 'index.php', 'artisan'],
+    ignoreDirs: ['vendor']
+  },
+  {
+    name: 'html',
+    indicators: ['index.html', 'home.html'],
+    ignoreDirs: []
+  },
+  {
+    name: 'css',
+    indicators: ['main.css', 'style.css'],
+    ignoreDirs: []
+  }
+];
+
+/**
+ * 通用忽略目录，所有项目类型都会忽略的目录
+ */
+const COMMON_IGNORED_DIRS = [
+  'dist', // 通用构建输出
+  'build', // 通用构建输出
+  'bin', // 二进制输出
+  'obj', // .NET 构建中间文件
+  '.idea', // IDE 配置
+  '.vscode', // IDE 配置
+  'packages' // 通用包目录
+];
+
+/**
+ * 获取所有需要忽略的目录
+ * @returns 所有需要忽略的目录列表
+ */
+function getAllIgnoredDirs(): string[] {
+  const allDirs = new Set<string>(COMMON_IGNORED_DIRS);
+
+  // 添加各语言特有的忽略目录
+  for (const config of PROJECT_CONFIGS) {
+    for (const dir of config.ignoreDirs) {
+      allDirs.add(dir);
+    }
+  }
+
+  return Array.from(allDirs);
+}
+
+// 计算所有需要忽略的目录
+const ALL_IGNORED_DIRS = getAllIgnoredDirs();
+
+/**
  * 递归查找git项目
  * @param dirHandle 文件系统目录句柄
  * @param basePath 基础路径
@@ -34,7 +118,7 @@ export async function recursivelyFindGitProjects(
         if (
           entry.kind === 'directory' &&
           !entry.name.startsWith('.') &&
-          entry.name !== 'node_modules'
+          !ALL_IGNORED_DIRS.includes(entry.name)
         ) {
           await recursivelyFindGitProjects(entry, `${basePath}/${entry.name}`, projects);
         }
@@ -51,7 +135,7 @@ export async function recursivelyFindGitProjects(
     // 如果是git项目，添加到列表
     projects.push({
       projectName: dirHandle.name,
-      projectType: detectProjectType(),
+      projectType: await detectProjectType(dirHandle),
       currentBranch: configInfo.branch || '',
       remoteUrl: configInfo.remoteUrl || '',
       gitHandle,
@@ -108,11 +192,37 @@ async function readGitConfig(gitHandle: FileSystemDirectoryHandle): Promise<{
 
 /**
  * 根据项目文件检测项目类型
+ * @param dirHandle 项目目录句柄
  * @returns 项目类型
  */
-function detectProjectType(): string {
-  // 简单实现，实际需要检查文件来判断项目类型
-  return 'unknown';
+async function detectProjectType(dirHandle: FileSystemDirectoryHandle): Promise<string> {
+  try {
+    // 存储项目中找到的文件和目录
+    const foundFiles: string[] = [];
+
+    // 只检查根目录的文件和文件夹
+    try {
+      for await (const entry of dirHandle.values()) {
+        foundFiles.push(entry.name);
+      }
+    } catch (error) {
+      console.error('检查项目根目录出错:', error);
+    }
+
+    // 按配置中的优先级顺序检查项目类型
+    for (const config of PROJECT_CONFIGS) {
+      // 如果找到任一特征文件，判定为该类型
+      if (config.indicators.some((indicator) => foundFiles.includes(indicator))) {
+        return config.name;
+      }
+    }
+
+    // 如果无法判断，返回未知
+    return 'unknown';
+  } catch (error) {
+    console.error('检测项目类型出错:', error);
+    return 'unknown';
+  }
 }
 
 /**
