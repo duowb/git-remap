@@ -15,7 +15,6 @@ import { lookup } from 'mrmime';
 import { uiDistDir } from './dirs';
 import { findGitProjects } from './files';
 import { getGitRemoteUrl, setGitRemoteUrl } from './git';
-import { listHistoryFiles, readHistoryFile, recordGitOperation } from './history';
 
 export interface CreateServerOptions {
   cwd: string;
@@ -102,70 +101,6 @@ export function createHostServer() {
       });
     })
   );
-
-  router
-    .get(
-      '/api/history',
-      eventHandler((event) => {
-        const { res } = event.node;
-        const historyFiles = listHistoryFiles();
-        return requestFormat(res, {
-          code: 200,
-          data: historyFiles,
-          message: '获取历史记录成功'
-        });
-      })
-    )
-    .get(
-      '/api/history/:fileName',
-      eventHandler((event) => {
-        const { res } = event.node;
-        const { fileName } = event.context.params!;
-        if (!fileName) {
-          return requestFormat(res, {
-            code: 400,
-            data: null,
-            message: '参数错误'
-          });
-        }
-        const history = readHistoryFile(fileName);
-        return requestFormat(res, {
-          code: 200,
-          data: history,
-          message: '获取历史记录成功'
-        });
-      })
-    )
-    .post(
-      '/api/history',
-      eventHandler(async (event) => {
-        const body = await readBody<{
-          path: string;
-          oldRemote: string;
-          newRemote: string;
-          branch: string;
-        }>(event).catch(() => {});
-        const { res } = event.node;
-        if (!body) {
-          return requestFormat(res, {
-            code: 400,
-            data: null,
-            message: '参数错误'
-          });
-        }
-        recordGitOperation({
-          repoPath: body.path,
-          oldRemoteUrl: body.oldRemote,
-          newRemoteUrl: body.newRemote,
-          branch: body.branch
-        });
-        return requestFormat(res, {
-          code: 200,
-          data: null,
-          message: '记录成功'
-        });
-      })
-    );
 
   app.use(
     '/',
