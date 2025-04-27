@@ -3,5 +3,5 @@ import { version } from '../../../package.json';
 </script>
 
 <template>
-  <sup op50 cursor-pointer> v{{ version }} </sup>
+  <sup op50> v{{ version }} </sup>
 </template>
