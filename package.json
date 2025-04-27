@@ -1,5 +1,5 @@
 {
-  "name": "git-remap-ui",
+  "name": "git-remap",
   "version": "0.0.1",
   "packageManager": "pnpm@9.1.1",
   "description": "纯前端修改git的源地址",
