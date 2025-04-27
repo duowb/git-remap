@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { useFetch } from '@vueuse/core';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import { computed, ref, useTemplateRef } from 'vue';
+import { updateGitRemoteUrl, type Project } from '../../utils/git-finder';
 import Toast from '../toast/index.vue';
-import type { Project } from '../../../../src/types';
 
 type ToastType = InstanceType<typeof Toast>;
 
@@ -44,34 +43,40 @@ const oldUrl = computed(() => {
 const newUrl = ref('');
 const replaceLoading = ref(false);
 
+function checkNewUrl() {
+  try {
+    const url = new URL(newUrl.value);
+    if (url) {
+      return true;
+    }
+  } catch {
+    toastRef.value?.showErrorToast('操作失败', '请输入正确的地址');
+    return false;
+  }
+  return false;
+}
 async function replace() {
-  replaceLoading.value = true;
-  const newData = props.data.map((item) => {
-    return {
-      path: item.projectPath,
-      newRemote: item.remoteUrl.replace(oldUrl.value, newUrl.value)
-    };
-  });
-  const { data } = await useFetch<
-    {
-      path: string;
-      newRemote: string;
-      isReplaceSuccess: boolean;
-    }[]
-  >('/api/replace')
-    .post({
-      paths: newData
-    })
-    .json();
-  replaceLoading.value = false;
-  if (data.value.code !== 200) {
-    toastRef.value?.showErrorToast('替换失败', data.value.message);
+  if (!checkNewUrl()) {
     return;
   }
-  close();
-  const successCount = data.value.data.filter((item: any) => item.isReplaceSuccess).length;
-
+  replaceLoading.value = true;
+  const newData = props.data.map(async ({ gitHandle, remoteUrl }) => {
+    let newRemoteUrl = remoteUrl.replace(oldUrl.value, newUrl.value);
+    if (!remoteUrl.includes(oldUrl.value)) {
+      const { origin } = new URL(remoteUrl);
+      newRemoteUrl = remoteUrl.replace(origin, newUrl.value);
+    }
+    return await updateGitRemoteUrl(gitHandle, newRemoteUrl);
+  });
+  const isReplaceSuccess = await Promise.all(newData);
+  const successCount = isReplaceSuccess.filter((item) => item).length;
+  replaceLoading.value = false;
+  if (successCount !== props.data.length) {
+    toastRef.value?.showErrorToast('替换失败', `共 ${successCount} 个地址替换成功`);
+    return;
+  }
   toastRef.value?.showSuccessToast('替换成功', `共 ${successCount} 个地址替换成功`);
+  close();
   emits('success');
 }
 

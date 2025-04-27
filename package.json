@@ -1,8 +1,8 @@
 {
-  "name": "git-remap",
-  "version": "0.0.4",
+  "name": "git-remap-ui",
+  "version": "0.0.1",
   "packageManager": "pnpm@9.1.1",
-  "description": "修改git的源地址",
+  "description": "纯前端修改git的源地址",
   "type": "module",
   "keywords": [],
   "license": "MIT",
@@ -25,31 +25,11 @@
     }
   },
   "sideEffects": false,
-  "bin": "./bin.mjs",
   "scripts": {
-    "build": "nr js:build && nr ui:build",
+    "build": "nr ui:build",
     "dev": "nr -C ui dev",
-    "js:build": "unbuild",
     "ui:build": "nr -C ui build",
-    "lint": "eslint .",
-    "prepublishOnly": "nr build",
-    "release": "bumpp && npm publish",
-    "test": "vitest",
-    "typecheck": "pnpm -r typecheck",
-    "prepare": "simple-git-hooks",
-    "server": "tsx watch src/mock-server.ts"
-  },
-  "dependencies": {
-    "ansis": "^3.12.0",
-    "cac": "^6.7.14",
-    "error-stack-parser-es": "^0.1.4",
-    "exit-hook": "^4.0.0",
-    "get-port-please": "^3.1.2",
-    "h3": "^1.11.1",
-    "mrmime": "^2.0.0",
-    "open": "^10.1.0",
-    "simple-git": "^3.27.0",
-    "trace-record": "^0.2.0"
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@antfu/ni": "^0.21.12",
@@ -60,12 +40,8 @@
     "lint-staged": "^15.2.2",
     "pnpm": "^9.1.1",
     "prettier": "^3.5.3",
-    "rimraf": "^5.0.7",
     "simple-git-hooks": "^2.11.1",
-    "tsx": "^4.19.3",
-    "typescript": "^5.4.5",
-    "unbuild": "^2.0.0",
-    "vitest": "^3.1.2"
+    "typescript": "^5.4.5"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged",

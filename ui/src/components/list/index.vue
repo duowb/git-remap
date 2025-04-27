@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useFetch } from '@vueuse/core';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import ConfirmDialog from 'primevue/confirmdialog';
@@ -9,7 +8,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { ref, shallowRef, useTemplateRef } from 'vue';
 import Toast from '../toast/index.vue';
 
-import type { Project } from '../../../../src/types';
+import type { Project } from '../../utils/git-finder';
 
 type ToastType = InstanceType<typeof Toast>;
 
@@ -17,9 +16,11 @@ const confirm = useConfirm();
 
 const selectItem = ref<Project[]>([]);
 
-const loading = defineModel('loading', { required: true });
-
 const toastRef = useTemplateRef<ToastType>('toastRef');
+
+defineProps<{
+  loading: boolean;
+}>();
 
 const emit = defineEmits<{
   (e: 'update', value: Project[]): void;
@@ -27,33 +28,8 @@ const emit = defineEmits<{
 
 const listData = shallowRef<Project[]>([]);
 
-function getData(searchPath: string) {
-  loading.value = true;
-  listData.value = [
-    {
-      projectName: '_skeleton',
-      projectType: '_skeleton',
-      currentBranch: '_skeleton',
-      remoteUrl: '_skeleton',
-      projectPath: '_skeleton'
-    }
-  ];
-  handleRowUnselectAll();
-  useFetch<{
-    data: Project[];
-    code: number;
-    message: string;
-  }>(`/api/files?path=${searchPath}`)
-    .json()
-    .then(({ data }) => {
-      loading.value = false;
-      if (data.value.code !== 200) {
-        listData.value = [];
-        toastRef.value?.showErrorToast('获取失败', data.value.message);
-        return;
-      }
-      listData.value = data.value.data;
-    });
+function setData(data: Project[]) {
+  listData.value = data;
 }
 
 function handleRowSelectAll({ data }: DataTableRowSelectAllEvent) {
@@ -63,6 +39,7 @@ function handleRowSelectAll({ data }: DataTableRowSelectAllEvent) {
 function handleRowUnselectAll() {
   selectItem.value = [];
 }
+
 function handleUpdate(data: Project[]) {
   if (data.length === 1) {
     emit('update', data);
@@ -70,7 +47,10 @@ function handleUpdate(data: Project[]) {
   }
   let remoteUrlHostname = '';
   for (const item of data) {
-    if (!item.remoteUrl) break;
+    if (!item.remoteUrl) {
+      toastRef.value?.showErrorToast(`操作失败`, `请先单独修改${item.projectName}项目`);
+      return;
+    }
     const currentItemHostname = new URL(item.remoteUrl).hostname;
     if (remoteUrlHostname && currentItemHostname !== remoteUrlHostname) {
       confirm.require({
@@ -97,7 +77,7 @@ function handleUpdate(data: Project[]) {
 }
 
 defineExpose({
-  getData
+  setData
 });
 </script>
 

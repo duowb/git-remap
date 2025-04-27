@@ -1,51 +1,64 @@
 <script setup lang="ts">
 import Button from 'primevue/button';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import InputText from 'primevue/inputtext';
-import { ref } from 'vue';
-
-const emits = defineEmits<{
-  (e: 'search', value: string): void;
-}>();
-
-defineProps<{
-  loading: boolean;
-}>();
+import { ref, shallowRef } from 'vue';
+import { getDirHandle, selectFolderAndFindGitProjects, type Project } from '../../utils/git-finder';
 
 const search = ref('');
-function clearSearch() {
-  search.value = '';
+
+const loading = defineModel<boolean>('loading', { required: true });
+
+const emits = defineEmits<{
+  (e: 'foundProjects', projects: Project[]): void;
+}>();
+
+const dirHandle = shallowRef<FileSystemDirectoryHandle | null>(null);
+
+async function handleSelectFolder() {
+  loading.value = true;
+  if (!dirHandle.value) return;
+  const { folderName, projects } = await selectFolderAndFindGitProjects(dirHandle.value);
+  search.value = `${folderName}/`;
+  emits('foundProjects', projects);
+  loading.value = false;
 }
 
-function handleSearch() {
-  emits('search', search.value);
+async function selectFolder() {
+  try {
+    dirHandle.value = await getDirHandle();
+    await handleSelectFolder();
+  } catch (error) {
+    console.error('选择路径失败:', error);
+  }
 }
+
+defineExpose({
+  handleSelectFolder
+});
 </script>
 
 <template>
   <div flex gap-2 w-full>
-    <IconField class="flex-1">
+    <InputGroup class="flex-1">
       <InputText
         v-model="search"
         type="text"
         class="w-full"
-        placeholder="请输入路径"
-        @keydown.enter="handleSearch"
+        placeholder="请选择路径"
+        readonly
+        disabled
       />
-      <InputIcon
-        v-show="search"
-        class="i-carbon-close-large cursor-pointer hover:text-red-500"
-        @click="clearSearch"
-      />
-    </IconField>
-    <Button
-      label="搜索"
-      :loading="loading"
-      icon="i-carbon:search text-5"
-      :disabled="!search || loading"
-      min-w-20
-      @click="handleSearch"
-    />
+      <InputGroupAddon>
+        <Button
+          icon="i-carbon:airplay-filled text-5"
+          severity="secondary"
+          variant="text"
+          :loading="loading"
+          @click="selectFolder"
+        />
+      </InputGroupAddon>
+    </InputGroup>
   </div>
 </template>
