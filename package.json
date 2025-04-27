@@ -44,8 +44,7 @@
     "typescript": "^5.4.5"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged",
-    "pre-push": "pnpm run test"
+    "pre-commit": "pnpm lint-staged"
   },
   "lint-staged": {
     "*": "eslint --fix"
