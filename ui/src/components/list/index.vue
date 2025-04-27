@@ -70,7 +70,10 @@ function handleUpdate(data: Project[]) {
   }
   let remoteUrlHostname = '';
   for (const item of data) {
-    if (!item.remoteUrl) break;
+    if (!item.remoteUrl) {
+      toastRef.value?.showErrorToast(`操作失败`, `请先单独修改${item.projectName}项目`);
+      return;
+    }
     const currentItemHostname = new URL(item.remoteUrl).hostname;
     if (remoteUrlHostname && currentItemHostname !== remoteUrlHostname) {
       confirm.require({

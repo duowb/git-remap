@@ -44,12 +44,33 @@ const oldUrl = computed(() => {
 const newUrl = ref('');
 const replaceLoading = ref(false);
 
+function checkNewUrl() {
+  try {
+    const url = new URL(newUrl.value);
+    if (url) {
+      return true;
+    }
+  } catch {
+    toastRef.value?.showErrorToast('操作失败', '请输入正确的地址');
+    return false;
+  }
+  return false;
+}
+
 async function replace() {
+  if (!checkNewUrl()) {
+    return;
+  }
   replaceLoading.value = true;
-  const newData = props.data.map((item) => {
+  const newData = props.data.map(({ projectPath, remoteUrl }) => {
+    let newRemoteUrl = remoteUrl.replace(oldUrl.value, newUrl.value);
+    if (!remoteUrl.includes(oldUrl.value)) {
+      const { origin } = new URL(remoteUrl);
+      newRemoteUrl = remoteUrl.replace(origin, newUrl.value);
+    }
     return {
-      path: item.projectPath,
-      newRemote: item.remoteUrl.replace(oldUrl.value, newUrl.value)
+      path: projectPath,
+      newRemote: newRemoteUrl
     };
   });
   const { data } = await useFetch<
