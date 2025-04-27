@@ -1,6 +1,6 @@
 {
   "name": "git-remap",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "packageManager": "pnpm@9.1.1",
   "description": "修改git的源地址",
   "type": "module",
