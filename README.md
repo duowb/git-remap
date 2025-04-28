@@ -5,7 +5,7 @@
 
 ### 使用方法
 
-[`https://git-remap-ui.vercel.app/`](https://git-remap-ui.vercel.app/)
+[`https://git.250508.xyz/`](https://git.250508.xyz/)
 
 
 
